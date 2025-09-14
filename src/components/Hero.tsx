@@ -4,12 +4,7 @@ import DemoForm from "@/components/DemoForm";
 import { useState } from "react";
 
 export default function Hero() {
-  const [activeTab, setActiveTab] = useState<"gmail" | "demo" | "upload">(
-    "gmail"
-  );
-
-  const baseBtn =
-    "px-4 py-3 rounded transition-all duration-300 text-sm font-medium shadow-lg";
+  const [activeTab, setActiveTab] = useState<"demo" | "upload">("demo");
 
   return (
     <section className="bg-white text-center py-20">
@@ -27,25 +22,13 @@ export default function Hero() {
       {/* Botões */}
       <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
         <button
-          onClick={() => setActiveTab("gmail")}
-          className={`w-full sm:w-auto px-8 py-4 rounded-lg text-base font-semibold transition-all duration-300 shadow-lg
-      ${
-        activeTab === "gmail"
-          ? "bg-gray-900 text-white hover:bg-gray-800"
-          : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50"
-      }`}
-        >
-          Conectar Gmail
-        </button>
-
-        <button
           onClick={() => setActiveTab("demo")}
           className={`w-full sm:w-auto px-8 py-4 rounded-lg text-base font-semibold transition-all duration-300 shadow-lg
-      ${
-        activeTab === "demo"
-          ? "bg-gray-900 text-white hover:bg-gray-800"
-          : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50"
-      }`}
+            ${
+              activeTab === "demo"
+                ? "bg-gray-900 text-white hover:bg-gray-800"
+                : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50"
+            }`}
         >
           Ver demonstração
         </button>
@@ -53,33 +36,24 @@ export default function Hero() {
         <button
           onClick={() => setActiveTab("upload")}
           className={`w-full sm:w-auto px-8 py-4 rounded-lg text-base font-semibold transition-all duration-300 shadow-lg
-      ${
-        activeTab === "upload"
-          ? "bg-gray-900 text-white hover:bg-gray-800"
-          : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50"
-      }`}
+            ${
+              activeTab === "upload"
+                ? "bg-gray-900 text-white hover:bg-gray-800"
+                : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50"
+            }`}
         >
-          Testar TXT / PDF
+          Testar EML / PDF / TXT
         </button>
       </div>
 
       {/* Conteúdo condicional */}
       <div className="mt-10 max-w-2xl mx-auto">
-        {activeTab === "gmail" && (
-          <div className="p-6 border rounded-lg bg-gray-50 text-left">
-            <h3 className="font-semibold text-lg mb-2">Conectar Gmail</h3>
-            <p className="text-sm text-gray-600">
-              Aqui você poderia iniciar o fluxo OAuth para conectar seu Gmail.
-            </p>
-          </div>
-        )}
-
         {activeTab === "demo" && (
           <div className="p-6 border rounded-lg bg-gray-50 text-left">
             <h3 className="font-semibold text-lg mb-2">Demonstração</h3>
             <p className="text-sm text-gray-600">
-              Exibir um formulário simples para colar o conteúdo de um e-mail e
-              classificar.
+              Exiba um formulário simples para colar o conteúdo de um e-mail e
+              classificar (ou use um exemplo pronto).
             </p>
           </div>
         )}

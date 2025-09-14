@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+const API_TOKEN = process.env.NEXT_PUBLIC_API_TOKEN ?? "";
 
 export type Category = "productive" | "unproductive";
 
@@ -83,7 +84,10 @@ export async function classifyEmail(
   try {
     const res = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${API_TOKEN}`, // 🔑
+      },
       body: JSON.stringify({
         subject: opts?.subject ?? null,
         body,
@@ -98,7 +102,7 @@ export async function classifyEmail(
       return null;
     }
     return payload as ClassifyResponse;
-  } catch (err) {
+  } catch {
     toast.error("Falha ao conectar ao servidor");
     return null;
   }
@@ -114,7 +118,11 @@ export async function classifyFile(
   try {
     const form = new FormData();
     form.append("file", file);
-    const res = await fetch(endpoint, { method: "POST", body: form });
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${API_TOKEN}` }, // 🔑
+      body: form,
+    });
     const payload = await parseJSON(res);
     if (!res.ok) {
       showHttpError(res, payload, "Erro na classificação de arquivo");
@@ -126,6 +134,7 @@ export async function classifyFile(
     return null;
   }
 }
+
 export async function classifyEml(file: File, profileId?: string | null) {
   return classifyFile(file, { profileId });
 }
@@ -142,7 +151,9 @@ export async function fetchLogs(params?: {
       since: params?.since,
       profile_id: params?.profileId,
     });
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${API_TOKEN}` }, // 🔑
+    });
     const payload = await parseJSON(res);
     if (!res.ok) {
       showHttpError(res, payload, "Erro ao buscar logs");

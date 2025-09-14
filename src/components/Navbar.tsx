@@ -7,13 +7,13 @@ export default function Navbar() {
         <div className="flex justify-center items-center h-24">
           <div className="flex items-center">
             <img
-              src="/images/logo-autou.webp"
+              src="/logo-autou.webp"
               alt="AutoU"
               className="h-16 w-auto"
               onError={(e) => {
                 const target = e.currentTarget as HTMLImageElement;
-                target.onerror = null; // evita loop infinito
-                target.src = "/logo-autou.webp"; // fallback
+                target.onerror = null;
+                target.src = "/logo-autou.webp";
               }}
             />
             <span className="text-4xl font-bold hidden ml-2">

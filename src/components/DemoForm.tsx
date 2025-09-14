@@ -1,46 +1,32 @@
 "use client";
 
 import profiles from "@/data/profiles.json";
+import type { ClassifyResponse } from "@/lib/api"; // 👈 importa direto o tipo da API
 import { classifyEmail, classifyFile } from "@/lib/api";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/Button";
 
-interface ClassificationResult {
-  category: string;
-  reason: string;
-  suggested_reply: string;
-  prompt_tokens?: number;
-  used_model?: string;
-  completion_tokens?: number;
-  total_tokens?: number;
-  cost_usd?: number;
-}
-
 export default function ClassifierForm() {
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [result, setResult] = useState<ClassificationResult | null>(null);
+  const [result, setResult] = useState<ClassifyResponse | null>(null); // 👈 usa o mesmo tipo
   const [loading, setLoading] = useState(false);
-  const [profileId, setProfileId] = useState<string>("");
+  const [profileId, setProfileId] = useState<string>(""); // 👈 string vazia, nunca null
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setResult(null);
 
     try {
-      if (!profileId) {
-        toast.warning("Selecione um perfil antes de classificar");
-        setLoading(false);
-        return;
-      }
+      let res: ClassifyResponse | null = null;
 
-      let res;
       if (file) {
-        res = await classifyFile(file, profileId);
+        res = await classifyFile(file, { profileId: profileId || null });
       } else if (text.trim().length > 0) {
-        res = await classifyEmail(text, profileId);
+        res = await classifyEmail(text, { profileId: profileId || null });
       } else {
         toast.warning("Nenhum texto ou arquivo fornecido");
         setLoading(false);
@@ -55,6 +41,7 @@ export default function ClassifierForm() {
 
       setResult(res);
 
+      // reset
       setFile(null);
       setText("");
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -87,7 +74,7 @@ export default function ClassifierForm() {
           <select
             id="profile"
             value={profileId}
-            onChange={(e) => setProfileId(e.target.value)}
+            onChange={(e) => setProfileId(e.target.value || "")}
             className="border rounded-lg p-3 text-sm bg-gray-50 focus:ring-4 focus:ring-purple-200 focus:outline-none transition-all duration-300"
           >
             <option value="">Selecione um perfil</option>
@@ -129,7 +116,7 @@ export default function ClassifierForm() {
             id="file-upload"
             ref={fileInputRef}
             type="file"
-            accept=".txt,.pdf"
+            accept=".txt,.pdf,.eml" // 👈 agora aceita .eml
             onChange={(e) => setFile(e.target.files?.[0] || null)}
             className="block w-full text-sm text-gray-600
                        file:mr-4 file:py-2 file:px-4

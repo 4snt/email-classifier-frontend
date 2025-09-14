@@ -1,9 +1,7 @@
-// src/lib/api.ts
 import { toast } from "sonner";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
-// ---------- Tipos ----------
 export type Category = "productive" | "unproductive";
 
 export interface ClassifyResponse {
@@ -33,7 +31,6 @@ export interface LogItem extends ClassifyResponse {
   extra?: unknown;
 }
 
-// ---------- Helpers ----------
 async function parseJSON(res: Response) {
   const text = await res.text();
   try {
@@ -58,7 +55,6 @@ function buildUrl(
 }
 
 function showHttpError(res: Response, payload: any, context: string) {
-  // 429 com Retry-After
   if (res.status === 429) {
     const ra = res.headers.get("Retry-After");
     toast.error(
@@ -75,8 +71,6 @@ function showHttpError(res: Response, payload: any, context: string) {
   toast.error(`${context}: ${msg}`);
 }
 
-// ---------- API ----------
-/** Classifica texto livre; `profileId` é opcional (backend usa "default") */
 export async function classifyEmail(
   body: string,
   opts?: {
@@ -94,7 +88,7 @@ export async function classifyEmail(
         subject: opts?.subject ?? null,
         body,
         sender: opts?.sender ?? null,
-        profile_id: opts?.profileId ?? undefined, // envia só se existir
+        profile_id: opts?.profileId ?? undefined,
       }),
     });
 
@@ -110,15 +104,16 @@ export async function classifyEmail(
   }
 }
 
-/** Classifica arquivo (.eml, .pdf ou .txt). `profileId` é opcional */
-export async function classifyFile(file: File, profileId?: string | null) {
+export async function classifyFile(
+  file: File,
+  opts?: { profileId?: string | null }
+) {
   const endpoint = buildUrl("/classify", {
-    profile_id: profileId ?? undefined,
+    profile_id: opts?.profileId ?? undefined,
   });
   try {
     const form = new FormData();
-    form.append("file", file); // content-type do próprio File é respeitado
-
+    form.append("file", file);
     const res = await fetch(endpoint, { method: "POST", body: form });
     const payload = await parseJSON(res);
     if (!res.ok) {
@@ -131,17 +126,14 @@ export async function classifyFile(file: File, profileId?: string | null) {
     return null;
   }
 }
-
-/** Alias explícito para .eml (usa a mesma rota) */
 export async function classifyEml(file: File, profileId?: string | null) {
-  return classifyFile(file, profileId);
+  return classifyFile(file, { profileId });
 }
 
-/** Busca logs para avaliação/benchmark no front */
 export async function fetchLogs(params?: {
-  limit?: number; // default backend = 100
-  since?: string; // ISO datetime opcional
-  category?: Category; // filtrar client-side se quiser
+  limit?: number;
+  since?: string;
+  category?: Category;
   profileId?: string;
 }) {
   try {

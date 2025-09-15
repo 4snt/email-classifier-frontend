@@ -1,6 +1,6 @@
 "use client";
 
-import profiles from "@/data/profiles.json"; // 👈 mesmo profiles do ClassifierForm
+import profiles from "@/data/profiles.json";
 import type { ClassifyResponse } from "@/lib/api";
 import { configureImapService } from "@/lib/api";
 import { useState } from "react";
@@ -9,12 +9,12 @@ import { Button } from "./ui/Button";
 
 export default function ImapForm() {
   const [form, setForm] = useState({
-    host: "",
+    host: "imap.gmail.com",
     user: "",
     password: "",
     mailbox: "INBOX",
     profile_id: "",
-    interval: 60,
+    interval: 10,
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ClassifyResponse | null>(null);
@@ -40,7 +40,7 @@ export default function ImapForm() {
       }
 
       setResult(res);
-      toast.success("Serviço IMAP iniciado!");
+      toast.success("✅ Serviço IMAP iniciado!");
     } catch (err) {
       console.error(err);
       toast.error("Erro inesperado ao configurar");
@@ -49,9 +49,50 @@ export default function ImapForm() {
     }
   }
 
+  async function handleStop() {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/imap/stop`, {
+        method: "POST",
+      });
+      const payload = await res.json();
+      if (res.ok) {
+        toast.success("🛑 Serviço IMAP parado!");
+        setResult(null);
+      } else {
+        toast.error(payload.detail ?? "Erro ao parar serviço IMAP");
+      }
+    } catch {
+      toast.error("Erro inesperado ao parar serviço IMAP");
+    }
+  }
+
   return (
     <div className="mt-10 max-w-2xl mx-auto">
       <h2 className="text-3xl font-bold mb-6">Conectar via IMAP</h2>
+
+      {/* Aviso para o usuário */}
+      <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-gray-700 space-y-2">
+        <p>
+          ⚠️ Para conectar ao Gmail, você precisa ativar{" "}
+          <strong>verificação em duas etapas (2FA)</strong> e usar uma{" "}
+          <strong>Senha de App</strong> em vez da sua senha normal.
+        </p>
+        <p>
+          👉{" "}
+          <a
+            href="https://myaccount.google.com/apppasswords"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-purple-600 underline hover:text-purple-800"
+          >
+            Clique aqui para gerar sua senha de app no Google
+          </a>
+        </p>
+        <p>
+          📝 Os logs não são permanentes — este é apenas um protótipo. Ao usar,
+          você concorda com as políticas de uso deste sistema.
+        </p>
+      </div>
 
       <form
         onSubmit={handleSubmit}
@@ -60,19 +101,10 @@ export default function ImapForm() {
         {/* Campos IMAP */}
         <input
           type="text"
-          name="host"
-          value={form.host}
-          onChange={handleChange}
-          placeholder="IMAP Host"
-          className="border rounded-lg p-3 text-sm bg-gray-50"
-          required
-        />
-        <input
-          type="text"
           name="user"
           value={form.user}
           onChange={handleChange}
-          placeholder="Usuário"
+          placeholder="Usuário (ex: seuemail@gmail.com)"
           className="border rounded-lg p-3 text-sm bg-gray-50"
           required
         />
@@ -81,17 +113,9 @@ export default function ImapForm() {
           name="password"
           value={form.password}
           onChange={handleChange}
-          placeholder="Senha / App password"
+          placeholder="Senha de App (16 caracteres)"
           className="border rounded-lg p-3 text-sm bg-gray-50"
           required
-        />
-        <input
-          type="text"
-          name="mailbox"
-          value={form.mailbox}
-          onChange={handleChange}
-          placeholder="Pasta (ex: INBOX)"
-          className="border rounded-lg p-3 text-sm bg-gray-50"
         />
 
         {/* Seletor de perfil */}
@@ -118,16 +142,7 @@ export default function ImapForm() {
           </select>
         </div>
 
-        <input
-          type="number"
-          name="interval"
-          value={form.interval}
-          onChange={handleChange}
-          placeholder="Intervalo (segundos)"
-          className="border rounded-lg p-3 text-sm bg-gray-50"
-        />
-
-        {/* Botão */}
+        {/* Botões */}
         <Button
           type="submit"
           isLoading={loading}
@@ -137,19 +152,26 @@ export default function ImapForm() {
         >
           {loading ? "Conectando..." : "Iniciar Serviço IMAP"}
         </Button>
+
+        <Button
+          type="button"
+          onClick={handleStop}
+          variant="secondary"
+          size="lg"
+          className="w-full"
+        >
+          Parar Serviço IMAP
+        </Button>
       </form>
 
       {/* Resultado */}
       {result && (
         <div className="mt-6 p-4 rounded-lg border bg-gray-50 shadow text-left space-y-2">
           <div>
-            <strong>Categoria:</strong> {result.category}
+            <strong>Status:</strong> {result.category ?? "OK"}
           </div>
           <div>
-            <strong>Motivo:</strong> {result.reason}
-          </div>
-          <div>
-            <strong>Resposta sugerida:</strong> {result.suggested_reply}
+            <strong>Mensagem:</strong> {result.reason}
           </div>
         </div>
       )}

@@ -71,23 +71,50 @@ function showHttpError(res: Response, payload: any, context: string) {
   toast.error(`${context}: ${msg}`);
 }
 
+/* =============== IMAP SERVICE =============== */
 export async function configureImapService(data: any) {
-  const res = await fetch(`${API_BASE}/imap/config`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  return await res.json();
+  try {
+    const res = await fetch(`${API_BASE}/imap/config`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const payload = await parseJSON(res);
+    if (!res.ok) {
+      showHttpError(res, payload, "Erro ao configurar IMAP");
+      return null;
+    }
+    return payload;
+  } catch {
+    toast.error("Falha ao conectar ao servidor");
+    return null;
+  }
 }
 
 export async function stopImapService() {
-  const res = await fetch(`${API_BASE}/imap/stop`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  });
-  return await res.json();
+  try {
+    const res = await fetch(`${API_BASE}/imap/stop`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const payload = await parseJSON(res);
+
+    if (!res.ok) {
+      showHttpError(res, payload, "Erro ao parar serviço IMAP");
+      return null;
+    }
+
+    toast.success("Serviço IMAP parado com sucesso.");
+    return payload;
+  } catch (err) {
+    console.error("Erro em stopImapService:", err);
+    toast.error("Falha ao conectar ao servidor");
+    return null;
+  }
 }
 
+/* =============== CLASSIFIER =============== */
 export async function classifyEmail(
   body: string,
   opts?: {

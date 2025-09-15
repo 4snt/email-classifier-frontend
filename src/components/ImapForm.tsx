@@ -65,7 +65,7 @@ export default function ImapForm() {
 
   return (
     <div className="mt-10 max-w-2xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6">Conectar via IMAP (MVP)</h2>
+      <h2 className="text-3xl font-bold mb-6">Conectar via IMAP GMAIL (MVP)</h2>
 
       <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-gray-700 space-y-2">
         <p>

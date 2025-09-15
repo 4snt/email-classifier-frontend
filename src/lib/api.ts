@@ -1,7 +1,6 @@
 import { toast } from "sonner";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
-const API_TOKEN = process.env.NEXT_PUBLIC_API_TOKEN ?? "";
 
 export type Category = "productive" | "unproductive";
 
@@ -39,6 +38,15 @@ async function parseJSON(res: Response) {
   } catch {
     return text;
   }
+}
+
+export async function configureImapService(data: any) {
+  const res = await fetch(`${API_BASE}/imap/config`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return await res.json();
 }
 
 function buildUrl(
@@ -86,7 +94,6 @@ export async function classifyEmail(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${API_TOKEN}`, // 🔑
       },
       body: JSON.stringify({
         subject: opts?.subject ?? null,
@@ -120,7 +127,6 @@ export async function classifyFile(
     form.append("file", file);
     const res = await fetch(endpoint, {
       method: "POST",
-      headers: { Authorization: `Bearer ${API_TOKEN}` }, // 🔑
       body: form,
     });
     const payload = await parseJSON(res);
@@ -151,9 +157,7 @@ export async function fetchLogs(params?: {
       since: params?.since,
       profile_id: params?.profileId,
     });
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${API_TOKEN}` }, // 🔑
-    });
+    const res = await fetch(url);
     const payload = await parseJSON(res);
     if (!res.ok) {
       showHttpError(res, payload, "Erro ao buscar logs");

@@ -1,10 +1,13 @@
 "use client";
 
 import DemoForm from "@/components/DemoForm";
+import ImapForm from "@/components/ImapForm";
 import { useState } from "react";
 
 export default function Hero() {
-  const [activeTab, setActiveTab] = useState<"demo" | "upload">("demo");
+  const [activeTab, setActiveTab] = useState<"demo" | "upload" | "imap">(
+    "demo"
+  );
 
   return (
     <section className="bg-white text-center py-20">
@@ -44,6 +47,18 @@ export default function Hero() {
         >
           Testar EML / PDF / TXT
         </button>
+
+        <button
+          onClick={() => setActiveTab("imap")}
+          className={`w-full sm:w-auto px-8 py-4 rounded-lg text-base font-semibold transition-all duration-300 shadow-lg
+            ${
+              activeTab === "imap"
+                ? "bg-gray-900 text-white hover:bg-gray-800"
+                : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50"
+            }`}
+        >
+          Conectar via IMAP
+        </button>
       </div>
 
       {/* Conteúdo condicional */}
@@ -61,6 +76,12 @@ export default function Hero() {
         {activeTab === "upload" && (
           <div className="text-sm text-gray-600">
             <DemoForm />
+          </div>
+        )}
+
+        {activeTab === "imap" && (
+          <div className="text-sm text-gray-600">
+            <ImapForm />
           </div>
         )}
       </div>

@@ -40,15 +40,6 @@ async function parseJSON(res: Response) {
   }
 }
 
-export async function configureImapService(data: any) {
-  const res = await fetch(`${API_BASE}/imap/config`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  return await res.json();
-}
-
 function buildUrl(
   path: string,
   params?: Record<string, string | number | boolean | undefined | null>
@@ -78,6 +69,23 @@ function showHttpError(res: Response, payload: any, context: string) {
       ? payload
       : payload?.detail ?? "Erro inesperado";
   toast.error(`${context}: ${msg}`);
+}
+
+export async function configureImapService(data: any) {
+  const res = await fetch(`${API_BASE}/imap/config`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return await res.json();
+}
+
+export async function stopImapService() {
+  const res = await fetch(`${API_BASE}/imap/stop`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  return await res.json();
 }
 
 export async function classifyEmail(

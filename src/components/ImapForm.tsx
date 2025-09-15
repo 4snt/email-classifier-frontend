@@ -1,7 +1,7 @@
 "use client";
 
 import profiles from "@/data/profiles.json";
-import { configureImapService } from "@/lib/api";
+import { configureImapService, stopImapService } from "@/lib/api";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/Button";
@@ -9,11 +9,14 @@ import { Button } from "./ui/Button";
 type ImapResponse = {
   status: string;
   profile_id?: string;
+  interval?: number;
+  mailbox?: string;
+  host?: string;
 };
 
 export default function ImapForm() {
   const [form, setForm] = useState({
-    host: "imap.gmail.com", // ✅ fixado no MVP
+    host: "imap.gmail.com",
     user: "",
     password: "",
     mailbox: "INBOX",
@@ -44,7 +47,7 @@ export default function ImapForm() {
       }
 
       setResult(res);
-      toast.success("✅ Serviço IMAP iniciado!");
+      toast.success("Serviço IMAP iniciado");
     } catch (err) {
       console.error(err);
       toast.error("Erro inesperado ao configurar");
@@ -54,19 +57,9 @@ export default function ImapForm() {
   }
 
   async function handleStop() {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/imap/stop`, {
-        method: "POST",
-      });
-      const payload = await res.json();
-      if (res.ok) {
-        toast.success("🛑 Serviço IMAP parado!");
-        setResult(payload);
-      } else {
-        toast.error(payload.detail ?? "Erro ao parar serviço IMAP");
-      }
-    } catch {
-      toast.error("Erro inesperado ao parar serviço IMAP");
+    const res = await stopImapService();
+    if (res) {
+      setResult(null);
     }
   }
 
@@ -74,10 +67,9 @@ export default function ImapForm() {
     <div className="mt-10 max-w-2xl mx-auto">
       <h2 className="text-3xl font-bold mb-6">Conectar via IMAP (MVP)</h2>
 
-      {/* Aviso para o usuário */}
       <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-gray-700 space-y-2">
         <p>
-          ⚠️ <strong>Este protótipo só funciona com contas do Gmail.</strong>
+          <strong>Este protótipo só funciona com contas do Gmail.</strong>
         </p>
         <p>
           Para conectar, você precisa ativar{" "}
@@ -85,7 +77,6 @@ export default function ImapForm() {
           <strong>Senha de App</strong> em vez da sua senha normal.
         </p>
         <p>
-          👉{" "}
           <a
             href="https://myaccount.google.com/apppasswords"
             target="_blank"
@@ -95,17 +86,13 @@ export default function ImapForm() {
             Clique aqui para gerar sua senha de app no Google
           </a>
         </p>
-        <p>
-          📝 Os logs não são permanentes — este é apenas um protótipo para
-          testes rápidos.
-        </p>
+        <p>Os logs não são permanentes — este é apenas um protótipo.</p>
       </div>
 
       <form
         onSubmit={handleSubmit}
         className="flex flex-col gap-5 bg-white p-6 rounded-xl shadow-xl border border-gray-200 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl"
       >
-        {/* Campos IMAP */}
         <input
           type="text"
           name="user"
@@ -125,7 +112,6 @@ export default function ImapForm() {
           required
         />
 
-        {/* Seletor de perfil */}
         <div className="flex flex-col text-left">
           <label
             htmlFor="profile"
@@ -149,7 +135,6 @@ export default function ImapForm() {
           </select>
         </div>
 
-        {/* Botões */}
         <Button
           type="submit"
           isLoading={loading}
@@ -171,7 +156,6 @@ export default function ImapForm() {
         </Button>
       </form>
 
-      {/* Resultado */}
       {result && (
         <div className="mt-6 p-4 rounded-lg border bg-gray-50 shadow text-left space-y-2">
           <div>

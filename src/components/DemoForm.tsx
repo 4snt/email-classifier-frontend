@@ -1,8 +1,9 @@
 "use client";
 
 import profiles from "@/data/profiles.json";
-import type { ClassifyResponse } from "@/lib/api"; // 👈 importa direto o tipo da API
+import type { ClassifyResponse } from "@/lib/api";
 import { classifyEmail, classifyFile } from "@/lib/api";
+import { X } from "lucide-react"; // 👈 ícone X
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/Button";
@@ -10,9 +11,9 @@ import { Button } from "./ui/Button";
 export default function ClassifierForm() {
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [result, setResult] = useState<ClassifyResponse | null>(null); // 👈 usa o mesmo tipo
+  const [result, setResult] = useState<ClassifyResponse | null>(null);
   const [loading, setLoading] = useState(false);
-  const [profileId, setProfileId] = useState<string>(""); // 👈 string vazia, nunca null
+  const [profileId, setProfileId] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -41,8 +42,7 @@ export default function ClassifierForm() {
 
       setResult(res);
 
-      // reset
-      setFile(null);
+      // reset texto, mas mantém arquivo até o usuário remover
       setText("");
       if (fileInputRef.current) fileInputRef.current.value = "";
 
@@ -56,12 +56,14 @@ export default function ClassifierForm() {
   }
 
   return (
-    <div className="mt-10 max-w-2xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6">Teste agora</h2>
+    <div className="mt-12 max-w-3xl mx-auto px-6">
+      <h2 className="text-3xl md:text-4xl font-light tracking-wide mb-8 bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent text-center">
+        Teste agora
+      </h2>
 
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-5 bg-white p-6 rounded-xl shadow-xl border border-gray-200 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl"
+        className="flex flex-col gap-6 bg-white p-8 rounded-2xl shadow-xl border border-gray-200 transition-all duration-300 hover:shadow-2xl"
       >
         {/* Seletor de perfil */}
         <div className="flex flex-col text-left">
@@ -75,7 +77,7 @@ export default function ClassifierForm() {
             id="profile"
             value={profileId}
             onChange={(e) => setProfileId(e.target.value || "")}
-            className="border rounded-lg p-3 text-sm bg-gray-50 focus:ring-4 focus:ring-purple-200 focus:outline-none transition-all duration-300"
+            className="border rounded-lg p-4 text-base bg-gray-50 focus:ring-2 focus:ring-purple-300 outline-none transition"
           >
             <option value="">Selecione um perfil</option>
             {Object.values(profiles).map((p: any) => (
@@ -99,8 +101,8 @@ export default function ClassifierForm() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Cole aqui o conteúdo de um e-mail..."
-            className="border rounded-lg p-4 text-sm bg-gray-50 focus:ring-4 focus:ring-purple-200 focus:outline-none transition-all duration-300"
-            rows={5}
+            className="border rounded-lg p-4 text-base bg-gray-50 focus:ring-2 focus:ring-purple-300 outline-none transition"
+            rows={6}
           />
         </div>
 
@@ -116,7 +118,7 @@ export default function ClassifierForm() {
             id="file-upload"
             ref={fileInputRef}
             type="file"
-            accept=".txt,.pdf,.eml" // 👈 agora aceita .eml
+            accept=".txt,.pdf,.eml"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
             className="block w-full text-sm text-gray-600
                        file:mr-4 file:py-2 file:px-4
@@ -125,10 +127,21 @@ export default function ClassifierForm() {
                        file:bg-purple-50 file:text-purple-700
                        hover:file:bg-purple-100"
           />
+
           {file && (
-            <p className="mt-2 text-sm text-purple-700">
-              Arquivo selecionado: {file.name}
-            </p>
+            <div className="mt-3 flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-700">
+              <span>📎 {file.name}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setFile(null);
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+                className="text-gray-500 hover:text-red-600 transition"
+              >
+                <X size={18} />
+              </button>
+            </div>
           )}
         </div>
 
@@ -146,7 +159,7 @@ export default function ClassifierForm() {
 
       {/* Resultado */}
       {result && (
-        <div className="mt-6 p-4 rounded-lg border bg-gray-50 shadow text-left space-y-2">
+        <div className="mt-8 p-5 rounded-xl border bg-gray-50 shadow text-left space-y-2">
           <div>
             <strong>Categoria:</strong> {result.category}
           </div>
@@ -156,8 +169,9 @@ export default function ClassifierForm() {
           <div>
             <strong>Resposta sugerida:</strong> {result.suggested_reply}
           </div>
+
           {result.total_tokens !== undefined && (
-            <div className="mt-4 pt-4 border-t text-sm text-gray-600">
+            <div className="mt-4 pt-4 border-t text-sm text-gray-600 space-y-1">
               <div>
                 <strong>Model:</strong> {result.used_model}
               </div>

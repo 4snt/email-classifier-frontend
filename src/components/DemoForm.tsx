@@ -130,7 +130,7 @@ export default function ClassifierForm() {
 
           {file && (
             <div className="mt-3 flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-700">
-              <span>📎 {file.name}</span>
+              <span> {file.name}</span>
               <button
                 type="button"
                 onClick={() => {

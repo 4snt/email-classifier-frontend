@@ -2,7 +2,6 @@
 
 import profiles from "@/data/profiles.json";
 import { configureImapService, stopImapService } from "@/lib/api";
-import { X } from "lucide-react"; // 👈 ícone X
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/Button";
@@ -142,35 +141,6 @@ export default function ImapForm() {
               </option>
             ))}
           </select>
-        </div>
-
-        {/* Upload opcional de arquivo */}
-        <div className="flex flex-col text-left">
-          <label className="text-sm font-medium text-gray-700 mb-2">
-            Testar upload de e-mail
-          </label>
-          <div className="relative">
-            <input
-              type="file"
-              accept=".eml,.txt,.pdf"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
-                         file:rounded-md file:border-0 file:text-sm file:font-medium
-                         file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
-            />
-            {file && (
-              <div className="mt-2 flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-700">
-                <span>📎 {file.name}</span>
-                <button
-                  type="button"
-                  onClick={() => setFile(null)}
-                  className="text-gray-500 hover:text-red-600 transition"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Botões */}

@@ -1,15 +1,19 @@
 "use client";
 
 import profiles from "@/data/profiles.json";
-import type { ClassifyResponse } from "@/lib/api";
 import { configureImapService } from "@/lib/api";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/Button";
 
+type ImapResponse = {
+  status: string;
+  profile_id?: string;
+};
+
 export default function ImapForm() {
   const [form, setForm] = useState({
-    host: "imap.gmail.com",
+    host: "imap.gmail.com", // ✅ fixado no MVP
     user: "",
     password: "",
     mailbox: "INBOX",
@@ -17,7 +21,7 @@ export default function ImapForm() {
     interval: 10,
   });
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<ClassifyResponse | null>(null);
+  const [result, setResult] = useState<ImapResponse | null>(null);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -57,7 +61,7 @@ export default function ImapForm() {
       const payload = await res.json();
       if (res.ok) {
         toast.success("🛑 Serviço IMAP parado!");
-        setResult(null);
+        setResult(payload);
       } else {
         toast.error(payload.detail ?? "Erro ao parar serviço IMAP");
       }
@@ -68,12 +72,15 @@ export default function ImapForm() {
 
   return (
     <div className="mt-10 max-w-2xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6">Conectar via IMAP</h2>
+      <h2 className="text-3xl font-bold mb-6">Conectar via IMAP (MVP)</h2>
 
       {/* Aviso para o usuário */}
       <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-gray-700 space-y-2">
         <p>
-          ⚠️ Para conectar ao Gmail, você precisa ativar{" "}
+          ⚠️ <strong>Este protótipo só funciona com contas do Gmail.</strong>
+        </p>
+        <p>
+          Para conectar, você precisa ativar{" "}
           <strong>verificação em duas etapas (2FA)</strong> e usar uma{" "}
           <strong>Senha de App</strong> em vez da sua senha normal.
         </p>
@@ -89,8 +96,8 @@ export default function ImapForm() {
           </a>
         </p>
         <p>
-          📝 Os logs não são permanentes — este é apenas um protótipo. Ao usar,
-          você concorda com as políticas de uso deste sistema.
+          📝 Os logs não são permanentes — este é apenas um protótipo para
+          testes rápidos.
         </p>
       </div>
 
@@ -168,11 +175,13 @@ export default function ImapForm() {
       {result && (
         <div className="mt-6 p-4 rounded-lg border bg-gray-50 shadow text-left space-y-2">
           <div>
-            <strong>Status:</strong> {result.category ?? "OK"}
+            <strong>Status:</strong> {result.status}
           </div>
-          <div>
-            <strong>Mensagem:</strong> {result.reason}
-          </div>
+          {result.profile_id && (
+            <div>
+              <strong>Perfil:</strong> {result.profile_id}
+            </div>
+          )}
         </div>
       )}
     </div>
